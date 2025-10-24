@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS Executive 30-Day Interactive Timetable</title>
+    <title>CS Executive 35-Day Extreme Focus Timetable (Editable)</title>
+    <!-- Tailwind CSS CDN for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for the chart visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Calm Study Neutrals -->
-    <!-- Application Structure Plan: The SPA is designed as an interactive dashboard, not a linear report. This structure was chosen to transform the static timetable into a dynamic planning tool. It features: 1) A summary section with key metrics (cards) and a subject breakdown chart for an immediate overview. 2) A core interactive "Plan Viewer" that defaults to a focused "Daily View" to prevent user overload, with controls to navigate day-by-day or jump to a specific day. 3) A "Weekly View" toggle to provide a mid-term perspective. 4) Collapsible sections for reference material (full schedule, daily routine). This hierarchical and interactive design makes the dense information more digestible, explorable, and useful for a student's daily tracking needs compared to a simple static table. -->
-    <!-- Visualization & Content Choices: 
-        - Report Info: Total chapters per subject. Goal: Show proportions. Viz: Donut Chart. Interaction: Hover for details. Justification: Quick visual comparison of subject workload. Library: Chart.js.
-        - Report Info: Daily chapter allocation. Goal: Show daily tasks. Viz: Interactive HTML Cards. Interaction: Content updates via Day Selector/Buttons. Justification: Focuses user on a single day's tasks, more engaging than a static table. Method: Vanilla JS DOM manipulation.
-        - Report Info: Weekly progress. Goal: Summarize weekly load. Viz: Bar Chart showing chapters/day. Interaction: Updates with week navigation. Justification: Visualizes the intensity and distribution of study load across a week. Library: Chart.js.
-        - Report Info: Daily time routine & Full 30-day plan. Goal: Provide reference. Viz: HTML Tables in collapsible sections. Interaction: Click to expand/collapse. Justification: Keeps reference data accessible but unobtrusive. Method: Vanilla JS.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
     <style>
+        /* BRIGHT COLOR PALETTE: Vibrant Cyan/Teal and Mint Green */
+        :root {
+            --color-primary: #00ADB5; /* Vibrant Cyan */
+            --color-secondary: #393E46; /* Dark Slate for contrast */
+            --color-background: #F4F9F9; /* Very Light Pale Cyan/White */
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #FDFBF8;
-            color: #4A4A4A;
+            background-color: var(--color-background);
+            color: var(--color-secondary);
         }
         .chart-container {
             position: relative;
@@ -31,14 +32,25 @@
             margin-left: auto;
             margin-right: auto;
         }
+        /* Updated Glassmorphism with slight background tint */
         .glassmorphism-card {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 173, 181, 0.1); /* Slight cyan border */
         }
-        .nav-button.active {
-            background-color: #A88B79;
-            color: #FFFFFF;
+        /* Visual cue for completed tasks */
+        .completed {
+            opacity: 0.5;
+            text-decoration: line-through;
+            transition: opacity 0.3s ease;
+        }
+        .plan-card:hover {
+            box-shadow: 0 4px 15px rgba(0, 173, 181, 0.2);
+            transform: translateY(-2px);
+            transition: all 0.2s ease-in-out;
+        }
+        .subject-input:focus {
+            border-bottom: 2px solid var(--color-primary);
         }
     </style>
 </head>
@@ -46,69 +58,64 @@
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
 
         <header class="text-center mb-10">
-            <h1 class="text-3xl md:text-4xl font-bold text-[#6D5D53]">CS Executive 30-Day Study Dashboard</h1>
-            <p class="mt-2 text-lg text-[#A88B79]">An interactive guide to conquer the syllabus in one month.</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-[--color-primary]">CS Executive 35-Day Extreme Focus Timetable</h1>
+            <p class="mt-2 text-lg text-[--color-secondary]">2 x 6-hour slots/day, now fully **editable** and saved.</p>
         </header>
 
         <main class="space-y-12">
             
             <section id="dashboard-summary" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="glassmorphism-card p-5 rounded-xl shadow-lg text-center">
-                    <h3 class="text-lg font-semibold text-[#6D5D53]">Total Chapters</h3>
-                    <p class="text-4xl font-bold text-[#A88B79] mt-2">87</p>
+                <div class="glassmorphism-card p-5 rounded-xl shadow-xl text-center">
+                    <h3 class="text-lg font-semibold text-[--color-secondary]">Total Subjects</h3>
+                    <p class="text-4xl font-bold text-[--color-primary] mt-2">4</p>
                 </div>
-                <div class="glassmorphism-card p-5 rounded-xl shadow-lg text-center">
-                    <h3 class="text-lg font-semibold text-[#6D5D53]">Study Days</h3>
-                    <p class="text-4xl font-bold text-[#A88B79] mt-2">30</p>
+                <div class="glassmorphism-card p-5 rounded-xl shadow-xl text-center">
+                    <h3 class="text-lg font-semibold text-[--color-secondary]">Daily Study Slots</h3>
+                    <p class="text-4xl font-bold text-[--color-primary] mt-2">2</p>
                 </div>
-                <div class="glassmorphism-card p-5 rounded-xl shadow-lg text-center">
-                    <h3 class="text-lg font-semibold text-[#6D5D53]">Subjects</h3>
-                    <p class="text-4xl font-bold text-[#A88B79] mt-2">4</p>
+                <div class="glassmorphism-card p-5 rounded-xl shadow-xl text-center">
+                    <h3 class="text-lg font-semibold text-[--color-secondary]">Total Days</h3>
+                    <p class="text-4xl font-bold text-[--color-primary] mt-2">35</p>
                 </div>
-                <div class="glassmorphism-card p-5 rounded-xl shadow-lg text-center">
-                    <h3 class="text-lg font-semibold text-[#6D5D53]">Avg. Daily Target</h3>
-                    <p class="text-4xl font-bold text-[#A88B79] mt-2">~3 Chapters</p>
+                <div class="glassmorphism-card p-5 rounded-xl shadow-xl text-center">
+                    <h3 class="text-lg font-semibold text-[--color-secondary]">Slot Duration</h3>
+                    <p class="text-4xl font-bold text-[--color-primary] mt-2">6 hrs</p>
                 </div>
             </section>
             
             <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-                 <div class="lg:col-span-1 glassmorphism-card p-6 rounded-xl shadow-lg h-[400px] flex flex-col">
-                    <h2 class="text-xl font-bold text-[#6D5D53] text-center mb-4">Subject Workload</h2>
+                 <div class="lg:col-span-1 glassmorphism-card p-6 rounded-xl shadow-xl h-[400px] flex flex-col">
+                    <h2 class="text-xl font-bold text-[--color-secondary] text-center mb-4">Subject Workload</h2>
                      <div class="chart-container flex-grow">
                         <canvas id="subjectChart"></canvas>
                     </div>
                 </div>
-                <div class="lg:col-span-2 glassmorphism-card p-6 rounded-xl shadow-lg h-full">
-                    <h2 class="text-xl font-bold text-[#6D5D53] mb-4">Daily Time Structure</h2>
+                <div class="lg:col-span-2 glassmorphism-card p-6 rounded-xl shadow-xl h-full">
+                    <h2 class="text-xl font-bold text-[--color-secondary] mb-4">Daily Study Block Structure (12 Hrs Total)</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-[#A88B79]/20 text-[#6D5D53]">
+                            <thead class="bg-[--color-primary]/20 text-[--color-secondary]">
                                 <tr>
-                                    <th class="p-3 rounded-tl-lg">Time Slot</th>
+                                    <th class="p-3 rounded-tl-lg">Study Block</th>
                                     <th class="p-3">Duration</th>
-                                    <th class="p-3 rounded-tr-lg">Activity</th>
+                                    <th class="p-3 rounded-tr-lg">Primary Focus</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="border-b border-[#A88B79]/20">
-                                    <td class="p-3 font-medium">7:00 AM - 10:00 AM</td>
-                                    <td class="p-3">2.5 hrs</td>
-                                    <td class="p-3">Slot 1 (Theory Focus)</td>
+                                <tr class="border-b border-[--color-primary]/20">
+                                    <td class="p-3 font-medium">Slot 1</td>
+                                    <td class="p-3">6 hrs</td>
+                                    <td class="p-3">Deep Dive, Major Chapter Completion (Focus Subject A)</td>
                                 </tr>
-                                <tr class="border-b border-[#A88B79]/20">
-                                    <td class="p-3 font-medium">11:00 AM - 1:30 PM</td>
-                                    <td class="p-3">2.5 hrs</td>
-                                    <td class="p-3">Slot 2 (Technical Focus - CAFM)</td>
-                                </tr>
-                                <tr class="border-b border-[#A88B79]/20">
-                                    <td class="p-3 font-medium">3:00 PM - 5:30 PM</td>
-                                    <td class="p-3">2.5 hrs</td>
-                                    <td class="p-3">Slot 3 (Theory Focus)</td>
+                                <tr class="border-b border-[--color-primary]/20">
+                                    <td class="p-3 font-medium">Slot 2</td>
+                                    <td class="p-3">6 hrs</td>
+                                    <td class="p-3">Application, Full Subject Practice, and Revision (Focus Subject B)</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-3 font-medium rounded-bl-lg">7:00 PM - 9:00 PM</td>
-                                    <td class="p-3">2 hrs</td>
-                                    <td class="p-3 rounded-br-lg">MCQ Practice & Note Making</td>
+                                    <td class="p-3 font-medium rounded-bl-lg">Break Time</td>
+                                    <td class="p-3">2-3 Hrs</td>
+                                    <td class="p-3 rounded-br-lg">Walks, Meals, Self-Quizzing, Rest</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -116,208 +123,402 @@
                 </div>
             </section>
 
-            <section id="plan-viewer" class="glassmorphism-card p-6 rounded-xl shadow-lg">
+            <section id="plan-viewer" class="glassmorphism-card p-6 rounded-xl shadow-xl">
                 <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                    <h2 class="text-2xl font-bold text-[#6D5D53]">Plan Explorer</h2>
+                    <h2 class="text-2xl font-bold text-[--color-secondary]">Plan Explorer</h2>
                     <div class="flex items-center gap-4">
-                        <label for="day-selector" class="font-semibold text-[#6D5D53]">Go to Day:</label>
-                        <select id="day-selector" class="bg-white border border-[#A88B79]/50 rounded-lg p-2 focus:ring-2 focus:ring-[#A88B79] focus:border-[#A88B79] transition"></select>
+                        <label for="day-selector" class="font-semibold text-[--color-secondary]">Go to Day:</label>
+                        <select id="day-selector" class="bg-white border border-[--color-primary]/50 rounded-lg p-2 focus:ring-2 focus:ring-[--color-primary] focus:border-[--color-primary] transition"></select>
                     </div>
                 </div>
 
                 <div class="flex justify-center mb-6">
-                    <div class="flex items-center p-1 bg-[#A88B79]/10 rounded-lg">
-                        <button id="prev-day" class="px-4 py-2 text-lg font-bold text-[#A88B79] rounded-md hover:bg-[#A88B79]/20 transition-colors duration-300">←</button>
-                        <h3 id="current-day-title" class="text-xl font-bold text-[#6D5D53] mx-4 w-24 text-center">Day 1</h3>
-                        <button id="next-day" class="px-4 py-2 text-lg font-bold text-[#A88B79] rounded-md hover:bg-[#A88B79]/20 transition-colors duration-300">→</button>
+                    <div class="flex items-center p-1 bg-[--color-primary]/10 rounded-lg">
+                        <button id="prev-day" class="px-4 py-2 text-lg font-bold text-[--color-primary] rounded-md hover:bg-[--color-primary]/20 transition-colors duration-300">←</button>
+                        <h3 id="current-day-title" class="text-xl font-bold text-[--color-secondary] mx-4 w-24 text-center">Day 1</h3>
+                        <button id="next-day" class="px-4 py-2 text-lg font-bold text-[--color-primary] rounded-md hover:bg-[--color-primary]/20 transition-colors duration-300">→</button>
                     </div>
                 </div>
                 
-                <div id="daily-plan-content" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div id="daily-plan-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Daily plan cards will be rendered here -->
+                    <p class="col-span-full text-center text-gray-500" id="loading-message">Loading schedule data...</p>
                 </div>
 
             </section>
             
-            <section id="tips-section" class="glassmorphism-card p-6 rounded-xl shadow-lg">
-                <h2 class="text-2xl font-bold text-[#6D5D53] mb-4">Tips for Success</h2>
-                <ul class="space-y-3 list-disc list-inside text-[#4A4A4A]">
-                    <li><span class="font-semibold">Prioritize Understanding over Speed:</span> If a chapter is complex, do not rush. Use buffer days for difficult topics.</li>
-                    <li><span class="font-semibold">CAFM is Key:</span> Treat the CAFM slot as non-negotiable. Spend at least 2.5 hours daily on numerical problems.</li>
-                    <li><span class="font-semibold">Active Recall:</span> In the morning, try to write down key points from the previous day's study without looking at notes.</li>
-                    <li><span class="font-semibold">Practice Daily:</span> The evening slot for MCQs/Case Studies is vital for applying knowledge and building confidence.</li>
+            <section id="tips-section" class="glassmorphism-card p-6 rounded-xl shadow-xl">
+                <h2 class="text-2xl font-bold text-[--color-secondary] mb-4">Tips for Maximize Efficiency (2x6 Hour Slots)</h2>
+                <ul class="space-y-3 list-disc list-inside text-[--color-secondary]">
+                    <li><span class="font-semibold">6-Hour Immersion:</span> Use this long block for a single, non-negotiable goal: either completing a major chapter, solving 40+ complex numerical problems, or writing out two full mock answers.</li>
+                    <li><span class="font-semibold">Internal Breaks:</span> Within the 6-hour slot, enforce 5-minute movement breaks every 90 minutes to maintain concentration and prevent burnout.</li>
+                    <li><span class="font-semibold">Slot Transition:</span> The gap between Slot 1 and Slot 2 must be substantial (at least 1.5 hours) for deep rest, meal, and complete mental context-switching.</li>
+                    <li><span class="font-semibold">Integrated Revision:</span> The last 30 minutes of each 6-hour slot should be *pure active recall*—quizzing yourself on everything covered, without referencing the material.</li>
                 </ul>
             </section>
 
         </main>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, runTransaction, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        
+        // setLogLevel('debug'); // Uncomment for debugging Firestore
 
-            const subjectData = {
-                'JIGL': { name: 'JIGL', chapters: 18, color: '#A88B79' },
-                'CL': { name: 'Company Law', chapters: 19, color: '#C8B5A9' },
-                'SBIL': { name: 'SBIL', chapters: 20, color: '#E8DCD3' },
-                'CAFM': { name: 'CAFM', chapters: 28, color: '#6D5D53' }
-            };
+        const MAX_DAYS = 35; 
 
-            const scheduleData = [
-                { day: 1, slot1: { subject: 'JIGL', chapter: '1: Sources of Law' }, slot2: { subject: 'CAFM', chapter: '1: Intro to Financial Mgmt' }, slot3: { subject: 'CL', chapter: '1: Intro to Company Law' }},
-                { day: 2, slot1: { subject: 'CL', chapter: '2: Legal Status' }, slot2: { subject: 'CAFM', chapter: '2: Time Value of Money' }, slot3: { subject: 'SBIL', chapter: '1: Selection of Business Org.' }},
-                { day: 3, slot1: { subject: 'SBIL', chapter: '2: Corporate Entities' }, slot2: { subject: 'CAFM', chapter: '3: Capital Budgeting' }, slot3: { subject: 'JIGL', chapter: '2: Constitution of India' }},
-                { day: 4, slot1: { subject: 'JIGL', chapter: '3: Interpretation of Statutes' }, slot2: { subject: 'CAFM', chapter: '4: Cost of Capital' }, slot3: { subject: 'CL', chapter: '3: Memorandum/Articles' }},
-                { day: 5, slot1: { subject: 'CL', chapter: '4: Share & Share Capital' }, slot2: { subject: 'CAFM', chapter: '5: Dividend Decisions' }, slot3: { subject: 'SBIL', chapter: '3: LLP' }},
-                { day: 6, slot1: { subject: 'SBIL', chapter: '4: Startups & Registration' }, slot2: { subject: 'CAFM', chapter: '6: Capital Structure' }, slot3: { subject: 'JIGL', chapter: '4: Administrative Laws' }},
-                { day: 7, slot1: { subject: 'JIGL', chapter: '5: Law of Torts' }, slot2: { subject: 'CAFM', chapter: '7: Estimation & Mgmt of Working Cap.' }, slot3: { subject: 'CL', chapter: '5: Shareholder Concepts' }},
-                { day: 8, slot1: { subject: 'CL', chapter: '6: Debt Instruments' }, slot2: { subject: 'CAFM', chapter: '8: Receivables Mgmt' }, slot3: { subject: 'SBIL', chapter: '5: Micro, Small & Medium Ent.' }},
-                { day: 9, slot1: { subject: 'SBIL', chapter: '6: Conversion of Business Entities' }, slot2: { subject: 'CAFM', chapter: '9: Inventory Mgmt' }, slot3: { subject: 'JIGL', chapter: '6: Law of Taxes' }},
-                { day: 10, slot1: { subject: 'JIGL', chapter: '7: Civil Procedure' }, slot2: { subject: 'CAFM', chapter: '10: Cash Mgmt' }, slot3: { subject: 'CL', chapter: '7: Charges' }},
-                { day: 11, slot1: { subject: 'CL', chapter: '8: Distribution of Profits' }, slot2: { subject: 'CAFM', chapter: '11: Security Mgmt' }, slot3: { subject: 'SBIL', chapter: '7: Non-Corporate Entities' }},
-                { day: 12, slot1: { subject: 'SBIL', chapter: '8: Financial Services Org.' }, slot2: { subject: 'CAFM', chapter: '12: Capital Budgeting (Risk Analysis)' }, slot3: { subject: 'JIGL', chapter: '8: Crime & Procedure' }},
-                { day: 13, slot1: { subject: 'JIGL', chapter: '9: Evidence' }, slot2: { subject: 'CAFM', chapter: '13: Operational Approach' }, slot3: { subject: 'CL', chapter: '9: Accounts & Audits' }},
-                { day: 14, slot1: { subject: 'CL', chapter: '10: Compromise/Amalgamations' }, slot2: { subject: 'CAFM', chapter: '14: Corporate Accounting - Intro' }, slot3: { subject: 'SBIL', chapter: '9: Business Collaborations' }},
-                { day: 15, slot1: { subject: 'SBIL', chapter: '10: Branch Office/Liaison Office' }, slot2: { subject: 'CAFM', chapter: '15: CA - Company Final Accounts' }, slot3: { subject: 'JIGL', chapter: '10: Law relating to Limitation' }},
-                { day: 16, slot1: { subject: 'JIGL', chapter: '11: Arbitration, Mediation & Conciliation' }, slot2: { subject: 'CAFM', chapter: '16: CA - Issue of Shares' }, slot3: { subject: 'CL', chapter: '11: Dormant Company' }},
-                { day: 17, slot1: { subject: 'CL', chapter: '12: General Meetings' }, slot2: { subject: 'CAFM', chapter: '17: CA - Redemption of Preference Shares' }, slot3: { subject: 'SBIL', chapter: '11: Setting up outside India' }},
-                { day: 18, slot1: { subject: 'SBIL', chapter: '12: Identifying Laws Applicable' }, slot2: { subject: 'CAFM', chapter: '18: CA - Buy Back of Shares' }, slot3: { subject: 'JIGL', chapter: '12: Registration of Documents' }},
-                { day: 19, slot1: { subject: 'JIGL', chapter: '13: Right to Information Law' }, slot2: { subject: 'CAFM', chapter: '19: CA - ESOP/Bonus/Sweat Equity' }, slot3: { subject: 'CL', chapter: '13: Directors' }},
-                { day: 20, slot1: { subject: 'CL', chapter: '14: General Meetings (Part II)' }, slot2: { subject: 'CAFM', chapter: '20: CA - Accounting for Debentures' }, slot3: { subject: 'SBIL', chapter: '13: Initial Registrations & Licenses' }},
-                { day: 21, slot1: { subject: 'SBIL', chapter: '14: Constitution & Labour Laws' }, slot2: { subject: 'CAFM', chapter: '21: CA - Related Aspects (Underwriting)' }, slot3: { subject: 'JIGL', chapter: '14: Law relating to Information Tech' }},
-                { day: 22, slot1: { subject: 'JIGL', chapter: '15: Contract Law' }, slot2: { subject: 'CAFM', chapter: '22: CA - Consolidation of Accounts' }, slot3: { subject: 'CL', chapter: '15: Board Composition/Powers' }},
-                { day: 23, slot1: { subject: 'CL', chapter: '16: Meetings of Board/Committees' }, slot2: { subject: 'CAFM', chapter: '23: CA - Financial Statement Analysis Ratio' }, slot3: { subject: 'SBIL', chapter: '15: Evaluation of Labour Legislation' }},
-                { day: 24, slot1: { subject: 'SBIL', chapter: '16: Law of Welfare & Working Condition' }, slot2: { subject: 'CAFM', chapter: '24: CA - Cash Flow Statement' }, slot3: { subject: 'JIGL', chapter: '16: Negotiable Instruments' }},
-                { day: 25, slot1: { subject: 'JIGL', chapter: '17: Law relating to Arbitration, Mediation & Conciliation' }, slot2: { subject: 'CAFM', chapter: '25: CA - Forecasting Financial Statements' }, slot3: { subject: 'CL', chapter: '17: Annual Report - Concepts' }},
-                { day: 26, slot1: { subject: 'CL', chapter: '18: Key Managerial Personnel (KMPs)' }, slot2: { subject: 'CAFM', chapter: '26: Revision of CAFM Practical Concepts' }, slot3: { subject: 'SBIL', chapter: '17: Law of Industrial Relations' }},
-                { day: 27, slot1: { subject: 'SBIL', chapter: '18: Law of Wages' }, slot2: { subject: 'CAFM', chapter: '27: Revision of CAFM Practical Concepts' }, slot3: { subject: 'JIGL', chapter: '18: Law relating to Limitation' }},
-                { day: 28, slot1: { subject: 'JIGL', chapter: 'Full Day Revision' }, slot2: { subject: 'CAFM', chapter: 'Full Day Revision' }, slot3: { subject: 'SBIL', chapter: 'Full Day Revision' }},
-                { day: 29, slot1: { subject: 'ALL', chapter: 'Mock Test 1 & Analysis' }, slot2: { subject: 'ALL', chapter: 'Targeted Revision' }, slot3: { subject: 'ALL', chapter: 'Note Making' }},
-                { day: 30, slot1: { subject: 'ALL', chapter: 'Mock Test 2 & Final Review' }, slot2: { subject: 'ALL', chapter: 'Review Formulas' }, slot3: { subject: 'ALL', chapter: 'Rest & Prepare' }}
-            ];
+        // Global Firebase variables
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-            let currentDay = 1;
+        let app;
+        let db;
+        let auth;
+        let userId = null;
+        let currentDay = 1;
+        let unsubscribe = null; // To hold the Firestore listener unsubscribe function
+        let currentDayData = null; // Data fetched from Firestore for the current day
 
-            const daySelector = document.getElementById('day-selector');
-            const currentDayTitle = document.getElementById('current-day-title');
-            const dailyPlanContent = document.getElementById('daily-plan-content');
-            const prevDayBtn = document.getElementById('prev-day');
-            const nextDayBtn = document.getElementById('next-day');
+        // Subject data for color mapping (used for UI, not stored in Firestore)
+        const subjectData = {
+            'JIGL': { name: 'Jurisprudence, Interpretation & General Laws', color: '#00ADB5' },
+            'CL': { name: 'Company Law', color: '#4ECCA3' }, 
+            'SBIL': { name: 'Securities Laws & Industrial Laws', color: '#FFD369' },
+            'CAFM': { name: 'Corporate Accounting & Financial Management', color: '#393E46' },
+            'MASTER': { name: 'MASTERY SPRINT', color: '#FF6384' } 
+        };
+        
+        // Initial schedule data to populate Firestore (if empty)
+        const initialScheduleData = [
+            // Subject codes are used for subject/color mapping
+            { day: 1, slot1_subject: 'JIGL', slot2_subject: 'CL' },
+            { day: 2, slot1_subject: 'SBIL', slot2_subject: 'CL' },
+            { day: 3, slot1_subject: 'CAFM', slot2_subject: 'JIGL' },
+            { day: 4, slot1: { subject: 'CL' }, slot2_subject: 'CAFM' },
+            { day: 5, slot1_subject: 'SBIL', slot2_subject: 'JIGL' },
+            { day: 6, slot1_subject: 'CAFM', slot2_subject: 'CL' },
+            { day: 7, slot1_subject: 'JIGL', slot2_subject: 'SBIL' },
+            { day: 8, slot1_subject: 'CL', slot2_subject: 'CAFM' },
+            { day: 9, slot1_subject: 'SBIL', slot2_subject: 'CL' },
+            { day: 10, slot1_subject: 'CAFM', slot2_subject: 'JIGL' },
+            { day: 11, slot1_subject: 'JIGL', slot2_subject: 'SBIL' },
+            { day: 12, slot1_subject: 'CL', slot2_subject: 'CAFM' },
+            { day: 13, slot1_subject: 'SBIL', slot2_subject: 'JIGL' },
+            { day: 14, slot1_subject: 'CAFM', slot2_subject: 'CL' },
+            { day: 15, slot1_subject: 'JIGL', slot2_subject: 'SBIL' },
+            { day: 16, slot1_subject: 'CL', slot2_subject: 'CAFM' },
+            { day: 17, slot1_subject: 'SBIL', slot2_subject: 'CL' },
+            { day: 18, slot1_subject: 'CAFM', slot2_subject: 'JIGL' },
+            { day: 19, slot1_subject: 'JIGL', slot2_subject: 'SBIL' },
+            { day: 20, slot1_subject: 'CL', slot2_subject: 'CAFM' },
+            { day: 21, slot1_subject: 'SBIL', slot2_subject: 'CL' },
+            { day: 22, slot1_subject: 'CAFM', slot2_subject: 'JIGL' },
+            { day: 23, slot1_subject: 'JIGL', slot2_subject: 'SBIL' },
+            { day: 24, slot1_subject: 'CL', slot2_subject: 'CAFM' },
+            { day: 25, slot1_subject: 'JIGL', slot2_subject: 'CL' },
+            { day: 26, slot1_subject: 'SBIL', slot2_subject: 'CAFM' },
+            { day: 27, slot1_subject: 'CL', slot2_subject: 'JIGL' },
+            { day: 28, slot1_subject: 'CAFM', slot2_subject: 'SBIL' },
+            { day: 29, slot1_subject: 'JIGL', slot2_subject: 'CL' },
+            { day: 30, slot1_subject: 'SBIL', slot2_subject: 'CAFM' },
+            { day: 31, slot1_subject: 'MASTER', slot2_subject: 'MASTER' },
+            { day: 32, slot1_subject: 'MASTER', slot2_subject: 'MASTER' },
+            { day: 33, slot1_subject: 'MASTER', slot2_subject: 'MASTER' },
+            { day: 34, slot1_subject: 'MASTER', slot2_subject: 'MASTER' },
+            { day: 35, slot1_subject: 'MASTER', slot2_subject: 'MASTER' }
+        ].map(dayData => ({
+            ...dayData,
+            slot1_completed: false,
+            slot2_completed: false
+        }));
 
-            function populateDaySelector() {
-                for (let i = 1; i <= 30; i++) {
-                    const option = document.createElement('option');
-                    option.value = i;
-                    option.textContent = `Day ${i}`;
-                    daySelector.appendChild(option);
+
+        const daySelector = document.getElementById('day-selector');
+        const currentDayTitle = document.getElementById('current-day-title');
+        const dailyPlanContent = document.getElementById('daily-plan-content');
+        const prevDayBtn = document.getElementById('prev-day');
+        const nextDayBtn = document.getElementById('next-day');
+        const loadingMessage = document.getElementById('loading-message');
+
+        // --- FIREBASE FUNCTIONS ---
+
+        async function firebaseInit() {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                // Authenticate
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
                 }
-            }
-
-            function createPlanCard(slot, data) {
-                 const subjectInfo = subjectData[data.subject] || { name: data.subject, color: '#cccccc' };
-                 return `
-                    <div class="border-l-4 p-4 rounded-lg bg-white/50 shadow" style="border-color: ${subjectInfo.color};">
-                        <p class="text-sm font-semibold" style="color: ${subjectInfo.color};">${slot}</p>
-                        <h4 class="text-lg font-bold text-[#4A4A4A] mt-1">${subjectInfo.name}</h4>
-                        <p class="text-sm text-gray-600 mt-1">${data.chapter}</p>
-                    </div>
-                `;
-            }
-
-            function renderDailyView() {
-                const dayData = scheduleData[currentDay - 1];
-                currentDayTitle.textContent = `Day ${currentDay}`;
-                daySelector.value = currentDay;
                 
-                dailyPlanContent.innerHTML = `
-                    ${createPlanCard('Slot 1: Theory', dayData.slot1)}
-                    ${createPlanCard('Slot 2: Technical', dayData.slot2)}
-                    ${createPlanCard('Slot 3: Theory', dayData.slot3)}
-                `;
+                userId = auth.currentUser?.uid || crypto.randomUUID();
+                
+                await initializeScheduleIfEmpty();
+                
+                loadingMessage.textContent = 'Data synced.';
+                loadingMessage.classList.add('hidden');
 
-                prevDayBtn.disabled = currentDay === 1;
-                nextDayBtn.disabled = currentDay === 30;
-                prevDayBtn.classList.toggle('opacity-50', currentDay === 1);
-                nextDayBtn.classList.toggle('opacity-50', currentDay === 30);
+                // Start the listener for the current day
+                setupDayListener(currentDay);
+
+            } catch (error) {
+                console.error("Firebase Initialization Error:", error);
+                loadingMessage.textContent = "Error loading schedule. Check console for details.";
             }
+        }
+
+        // Path for public/shared data
+        function getDayDocRef(day) {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'schedule', `day_${day}`);
+        }
+        
+        async function initializeScheduleIfEmpty() {
+            const scheduleColRef = collection(db, 'artifacts', appId, 'public', 'data', 'schedule');
+            const snapshot = await getDocs(query(scheduleColRef));
+
+            if (snapshot.empty) {
+                console.log("Initializing schedule in Firestore...");
+                
+                // Use a transaction for batch writing for efficiency
+                await runTransaction(db, async (transaction) => {
+                    for (const data of initialScheduleData) {
+                        const ref = getDayDocRef(data.day);
+                        transaction.set(ref, data);
+                    }
+                });
+                console.log("Schedule initialized successfully.");
+            } else {
+                console.log("Schedule already exists in Firestore. Skipping initialization.");
+            }
+        }
+
+        function setupDayListener(day) {
+            // Unsubscribe from previous listener if it exists
+            if (unsubscribe) {
+                unsubscribe();
+            }
+
+            const ref = getDayDocRef(day);
             
-            function createSubjectChart() {
-                const ctx = document.getElementById('subjectChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: Object.values(subjectData).map(s => s.name),
-                        datasets: [{
-                            label: 'Chapters',
-                            data: Object.values(subjectData).map(s => s.chapters),
-                            backgroundColor: Object.values(subjectData).map(s => s.color),
-                            borderColor: '#FDFBF8',
-                            borderWidth: 4,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    boxWidth: 20,
-                                    padding: 15,
-                                    font: {
-                                        size: 12,
-                                        family: 'Inter'
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.label || '';
-                                        if (label) {
-                                            label += ': ';
-                                        }
-                                        if (context.parsed !== null) {
-                                            label += context.parsed + ' Chapters';
-                                        }
-                                        return label;
-                                    }
+            // Set up new listener for the current day's data
+            unsubscribe = onSnapshot(ref, (docSnap) => {
+                if (docSnap.exists()) {
+                    currentDayData = docSnap.data();
+                    renderDailyView();
+                } else {
+                    console.error(`Document for day ${day} not found.`);
+                    dailyPlanContent.innerHTML = `<p class="col-span-full text-center text-red-500">Error: Schedule for Day ${day} not found.</p>`;
+                }
+            }, (error) => {
+                console.error("Firestore onSnapshot error:", error);
+                dailyPlanContent.innerHTML = `<p class="col-span-full text-center text-red-500">Connection Error. Data may be out of sync.</p>`;
+            });
+        }
+
+        // Function to update the subject name in Firestore
+        window.updateSubject = async function(day, slotIndex, newSubject) {
+            const subjectKey = `slot${slotIndex}_subject`;
+            const ref = getDayDocRef(day);
+            
+            try {
+                await setDoc(ref, { [subjectKey]: newSubject.toUpperCase().trim() }, { merge: true });
+                console.log(`Day ${day}, Slot ${slotIndex} subject updated to: ${newSubject}`);
+            } catch (error) {
+                console.error("Error updating subject:", error);
+            }
+        }
+
+        // Function to toggle completion status in Firestore
+        window.toggleCompletion = async function(checkboxElement, day, slotIndex) {
+            const completionKey = `slot${slotIndex}_completed`;
+            const isCompleted = checkboxElement.checked;
+            const ref = getDayDocRef(day);
+
+            try {
+                await setDoc(ref, { [completionKey]: isCompleted }, { merge: true });
+                console.log(`Day ${day}, Slot ${slotIndex} completion set to: ${isCompleted}`);
+            } catch (error) {
+                console.error("Error toggling completion:", error);
+            }
+        }
+
+        // --- RENDERING FUNCTIONS ---
+
+        function getSubjectInfo(subjectCode) {
+            const code = subjectCode.toUpperCase().trim();
+            const info = subjectData[code];
+            // If the user types a custom subject, use a fallback color/name structure
+            return info || { name: code, color: '#9B59B6' }; // Default color for custom subjects
+        }
+        
+        function populateDaySelector() {
+            daySelector.innerHTML = ''; 
+            for (let i = 1; i <= MAX_DAYS; i++) { 
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `Day ${i}`;
+                daySelector.appendChild(option);
+            }
+        }
+        
+        function createPlanCard(slotIndex, day, data) {
+            const subjectKey = `slot${slotIndex}_subject`;
+            const completionKey = `slot${slotIndex}_completed`;
+            
+            const subjectCode = data[subjectKey] || 'N/A';
+            const isCompleted = data[completionKey] || false;
+            
+            const subjectInfo = getSubjectInfo(subjectCode);
+            let subjectDisplayName = subjectInfo.name;
+
+            // Use the subject code if the code is one of the four main subjects, otherwise use the typed value as the display name
+            if (subjectData[subjectCode] && subjectData[subjectCode].name) {
+                // If it's a standard subject, use the short code for the input value
+                subjectDisplayName = subjectCode;
+            } else {
+                // If it's a custom subject, use the custom name
+                subjectDisplayName = subjectCode;
+            }
+             
+            const checkboxId = `task-day-${day}-slot-${slotIndex}`;
+             
+            return `
+                <div class="plan-card border-l-4 p-4 rounded-xl bg-white/50 shadow flex flex-col justify-between ${isCompleted ? 'completed' : ''}" style="border-color: ${subjectInfo.color};">
+                    <div class="flex items-start justify-between">
+                        <label for="${checkboxId}" class="flex-grow cursor-pointer">
+                            <p class="text-sm font-semibold" style="color: ${subjectInfo.color};">Slot ${slotIndex} (6 Hours)</p>
+                            <div class="mt-1 space-y-2">
+                                <div>
+                                    <!-- Editable Subject Input -->
+                                    <input 
+                                        type="text" 
+                                        value="${subjectDisplayName}" 
+                                        placeholder="Enter Subject Code (e.g., CL, JIGL)"
+                                        class="subject-input text-lg font-bold w-full bg-transparent border-b border-gray-300 focus:border-[--color-primary] focus:outline-none transition-colors duration-200 p-0 m-0"
+                                        onblur="updateSubject(${day}, ${slotIndex}, this.value)"
+                                    />
+                                </div>
+                            </div>
+                        </label>
+                        <input 
+                            type="checkbox" 
+                            id="${checkboxId}" 
+                            class="h-6 w-6 ml-4 text-[--color-primary] bg-gray-100 border-gray-300 rounded focus:ring-[--color-primary] focus:ring-2 cursor-pointer"
+                            data-day="${day}"
+                            data-slot="${slotIndex}"
+                            ${isCompleted ? 'checked' : ''}
+                            onchange="toggleCompletion(this, ${day}, ${slotIndex})"
+                        >
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDailyView() {
+            // Check if Firebase data has been loaded
+            if (!currentDayData) return;
+
+            currentDayTitle.textContent = `Day ${currentDay}`;
+            daySelector.value = currentDay;
+            
+            // Render two cards using the data retrieved from Firestore
+            dailyPlanContent.innerHTML = `
+                ${createPlanCard(1, currentDay, currentDayData)}
+                ${createPlanCard(2, currentDay, currentDayData)}
+            `;
+
+            prevDayBtn.disabled = currentDay === 1;
+            nextDayBtn.disabled = currentDay === MAX_DAYS;
+            prevDayBtn.classList.toggle('opacity-50', currentDay === 1);
+            nextDayBtn.classList.toggle('opacity-50', currentDay === MAX_DAYS);
+        }
+        
+        function createSubjectChart() {
+            const ctx = document.getElementById('subjectChart').getContext('2d');
+            
+            const standardSubjects = Object.values(subjectData).filter(s => s.name.includes('Law') || s.name.includes('Management')); 
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: standardSubjects.map(s => s.name.split(' (')[0]),
+                    datasets: [{
+                        label: 'Subjects',
+                        // Use placeholder data for the chart since chapter counts were removed in the previous prompt
+                        data: [25, 25, 25, 25], 
+                        backgroundColor: standardSubjects.map(s => s.color),
+                        borderColor: 'var(--color-background)',
+                        borderWidth: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 20,
+                                padding: 15,
+                                font: { size: 12, family: 'Inter' },
+                                color: 'var(--color-secondary)'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ' (Study Weight)';
                                 }
                             }
                         },
-                        cutout: '60%'
-                    }
-                });
-            }
+                        title: {
+                            display: true,
+                            text: 'Module 1 Study Balance',
+                            font: { family: 'Inter', size: 14 }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
 
-            function handleNavigation() {
-                prevDayBtn.addEventListener('click', () => {
-                    if (currentDay > 1) {
-                        currentDay--;
-                        renderDailyView();
-                    }
-                });
+        function handleNavigation() {
+            prevDayBtn.addEventListener('click', () => {
+                if (currentDay > 1) {
+                    currentDay--;
+                    setupDayListener(currentDay);
+                }
+            });
 
-                nextDayBtn.addEventListener('click', () => {
-                    if (currentDay < 30) {
-                        currentDay++;
-                        renderDailyView();
-                    }
-                });
+            nextDayBtn.addEventListener('click', () => {
+                if (currentDay < MAX_DAYS) { 
+                    currentDay++;
+                    setupDayListener(currentDay);
+                }
+            });
 
-                daySelector.addEventListener('change', (e) => {
-                    currentDay = parseInt(e.target.value);
-                    renderDailyView();
-                });
-            }
+            daySelector.addEventListener('change', (e) => {
+                currentDay = parseInt(e.target.value);
+                setupDayListener(currentDay);
+            });
+        }
 
-            function init() {
-                populateDaySelector();
-                renderDailyView();
-                createSubjectChart();
-                handleNavigation();
-            }
+        function init() {
+            populateDaySelector();
+            handleNavigation();
+            createSubjectChart();
+            firebaseInit(); // Start the Firebase flow
+        }
 
-            init();
-        });
+        init();
     </script>
 </body>
 </html>
